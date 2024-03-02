@@ -1,0 +1,39 @@
+// SPDX-License-Identifier: MIT
+pragma solidity >=0.7.0 <0.9.0;
+
+contract ReceiveEther{
+    event log (string result);
+    // Functon to receive Ether. msg.data must be empty
+    receive() external payable{
+        emit log ("received");
+    }
+
+    // Fallback functon is called when msg.data is not empty
+    fallback() external payable{
+        emit log ("fallback");
+    }
+
+    function deposit() public payable {
+        emit log ("deposit");
+    }
+
+    function getBalance() public view returns (uint) {
+        return address(this).balance;
+    }
+}
+
+contract SendEther{
+    function sendviaTransfer(address payable _to) public payable {
+        _to.transfer(msg.value);
+    }
+
+    function sendViaSend(address payable _to) public payable {
+        bool sent = _to.send(msg.value);
+        require (sent , "Failed to send Ether");
+    }
+
+    function sendViacall(address _to) public payable {
+        (bool sent,) = _to.call{value: msg.value}(abi.encodeWithSignature("deposit()", "call deposit"));
+        require(sent, "Failed to send Ether");
+    }
+}
